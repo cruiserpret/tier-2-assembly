@@ -140,6 +140,106 @@
       <p class="demo-cta mono">↑ This is what Assembly produces for every topic you run</p>
     </section>
 
+    <!-- ── GOD'S EYE VIEW PREVIEW ── -->
+<section class="gev-section fade-up">
+  <div class="gev-header">
+    <div class="gev-eyebrow mono">
+      <span style="color:var(--accent);">◈</span>
+      The deliverable
+    </div>
+    <h2 class="gev-title display">GOD'S EYE VIEW</h2>
+    <p class="gev-desc">
+      After every simulation, Assembly produces a synthesis report —
+      who shifted, what argument was decisive, and where public opinion is actually headed.
+      This is what you're buying.
+    </p>
+  </div>
+
+  <div class="gev-window">
+
+    <!-- Left: report content -->
+    <div class="gev-content">
+
+      <div class="gev-topic mono">
+        Topic: "Should TikTok be banned in the USA?"
+      </div>
+
+      <div class="gev-summary-block">
+        <div class="gev-block-label mono">Executive Summary</div>
+        <p class="gev-summary-text">
+          The simulation revealed strong convergence toward a conditional ban over 3 rounds.
+          National security arguments proved decisive — 4 of 6 agents revised their position
+          after Elena Vasquez's intelligence-sharing evidence. The holdouts cited free speech
+          concerns but acknowledged they were in the minority.
+        </p>
+      </div>
+
+      <div class="gev-trajectory-block">
+        <div class="gev-block-label mono">Predicted Trajectory</div>
+        <div class="gev-trajectory">
+          <span class="gev-arrow">⟶</span>
+          <span>Public opinion converges toward a targeted device ban within 12 months,
+          with bipartisan support emerging around national security framing rather than
+          censorship concerns.</span>
+        </div>
+      </div>
+
+      <div class="gev-decisive">
+        <div class="gev-block-label mono">Decisive Argument</div>
+        <div class="gev-arg-card">
+          <div class="gev-arg-who">
+            <div class="sm-avatar avatar-for">E</div>
+            <span class="mono" style="font-size:11px;">Elena Vasquez</span>
+            <span class="tag tag-for" style="font-size:9px;padding:2px 6px;">for</span>
+            <span class="mono muted" style="font-size:10px;margin-left:auto;">Influenced 4 agents</span>
+          </div>
+          <p class="gev-arg-text">
+            "15 countries have already restricted TikTok based on classified intelligence
+            briefings the public hasn't seen. The US is late to act, not early."
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: outcome stats -->
+    <div class="gev-stats">
+      <div class="gev-stat-header mono">Outcome Stats</div>
+
+      <div class="gev-big-stat">
+        <span class="gev-big-num display accent">4</span>
+        <span class="mono muted" style="font-size:10px;">agents shifted</span>
+      </div>
+
+      <div class="gev-shift-bar-wrap">
+        <div class="gev-shift-bar">
+          <div class="gev-shift-fill" style="width:67%"></div>
+        </div>
+        <span class="mono muted" style="font-size:10px;margin-top:4px;">67% shift rate</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="gev-agents">
+        <div class="gev-block-label mono">Agent Journey</div>
+        <div class="gev-agent-row" v-for="a in gevAgents" :key="a.name">
+          <div class="sm-avatar" :class="`avatar-${a.stance}`">{{ a.name.charAt(0) }}</div>
+          <span class="gev-agent-name">{{ a.name }}</span>
+          <span class="gev-badge" :class="a.shifted ? 'shifted-badge' : 'held-badge'">
+            {{ a.shifted ? '↻' : '—' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="gev-cta-note mono">
+        Every simulation produces this report automatically.
+      </div>
+    </div>
+
+  </div>
+</section>
+
     <!-- ── LAUNCH FORM ── -->
     <section class="launch-section fade-up fade-up-4">
       <div class="launch-card">
@@ -205,6 +305,180 @@
 </template>
 
 <script setup>
+/* ── God's Eye View Section ── */
+.gev-section {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 48px;
+}
+.gev-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.gev-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.gev-title {
+  font-size: clamp(36px, 6vw, 64px);
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 14px;
+}
+.gev-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+
+.gev-window {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.gev-content {
+  padding: 24px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.gev-topic {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.gev-block-label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.gev-summary-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.gev-trajectory {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.gev-arrow { color: var(--accent); font-size: 18px; flex-shrink: 0; }
+
+.gev-arg-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.gev-arg-who {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.gev-arg-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* Stats sidebar */
+.gev-stats {
+  padding: 20px 16px;
+  background: var(--bg-2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gev-stat-header {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gev-big-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gev-big-num { font-size: 52px; line-height: 1; }
+.gev-shift-bar-wrap { display: flex; flex-direction: column; }
+.gev-shift-bar {
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.gev-shift-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), rgba(200,255,87,0.5));
+  border-radius: 2px;
+}
+
+.gev-agents { display: flex; flex-direction: column; gap: 6px; }
+.gev-agent-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gev-agent-name {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.gev-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 100px;
+  font-family: var(--mono);
+}
+.shifted-badge { background: rgba(62,232,160,0.12); color: var(--for); border: 1px solid rgba(62,232,160,0.25); }
+.held-badge    { background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--border); }
+
+.gev-cta-note {
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .gev-window { grid-template-columns: 1fr; }
+  .gev-content { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { assembly } from '../api/assembly.js'
@@ -221,6 +495,15 @@ const features = [
   { label: 'Live event injection',      color: 'var(--against)' },
   { label: 'Sentiment trajectory',      color: '#60A5FA' },
   { label: 'Simulation branching',      color: '#FBBF24' },
+]
+
+const gevAgents = [
+  { name:'Sarah',  stance:'for',     shifted:false },
+  { name:'Marcus', stance:'neutral', shifted:true  },
+  { name:'Elena',  stance:'for',     shifted:false },
+  { name:'James',  stance:'for',     shifted:true  },
+  { name:'Priya',  stance:'for',     shifted:true  },
+  { name:'Tom',    stance:'for',     shifted:true  },
 ]
 
 async function launch() {
