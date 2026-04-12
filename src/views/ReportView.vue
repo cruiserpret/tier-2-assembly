@@ -360,4 +360,17 @@ onMounted(async () => {
   .report-sidebar { order: -1; }
   .agent-summary-row { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 900px) {
+  .report-body { grid-template-columns: 1fr; }
+  .report-sidebar { order: -1; }
+}
+
+@media (max-width: 600px) {
+  .report-page { padding: 24px 16px 60px; }
+  .masthead-title { font-size: 32px; }
+  .agent-summary-row { grid-template-columns: 1fr; gap: 8px; }
+  .argument-card { flex-direction: column; gap: 10px; }
+  .arg-rank { font-size: 24px; width: auto; }
+}
 </style>

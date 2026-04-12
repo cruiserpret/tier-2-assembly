@@ -334,5 +334,20 @@ async function launch() {
   border: 1px solid var(--border);
   border-radius: 100px;
 }
+@media (max-width: 640px) {
+  .home { padding: 40px 16px 40px; }
+  .hero { margin-bottom: 32px; }
+  .hero-bracket { font-size: 28px; }
+  .hero-title { font-size: 72px; }
+  .hero-tagline { font-size: 14px; letter-spacing: 0.15em; }
+  .hero-sub { font-size: 14px; }
+  .hero-logo-bg { inset: -12px -16px; }
+  .stats-row { flex-direction: column; gap: 8px; }
+  .stat-pill { font-size: 10px; padding: 6px 12px; }
+  .launch-card { padding: 20px 16px; }
+  .form-row { grid-template-columns: 1fr; gap: 16px; }
+  .feature-pills { gap: 6px; }
+  .pill { font-size: 10px; padding: 4px 10px; }
+}
 .pill-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 </style>

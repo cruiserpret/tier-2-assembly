@@ -52,12 +52,22 @@ const $route = useRoute()
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 32px;
-  height: 56px;
-  background: rgba(6,8,15,0.85);
+  gap: 12px;
+  padding: 0 16px;
+  height: 52px;
+  background: rgba(6,8,15,0.9);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(12px);
+}
+.nav-logo { display:flex; align-items:baseline; gap:6px; text-decoration:none; color:var(--text); flex-shrink:0; }
+.nav-logo .display { font-size: 20px; color: var(--accent); }
+.nav-version { font-size: 10px; color: var(--text-dim); }
+.nav-center { flex:1; display:flex; justify-content:center; }
+.nav-actions { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+
+@media (max-width: 600px) {
+  .nav-center { display: none; }
+  .nav-actions .btn-ghost { display: none; }
 }
 
 .nav-logo {

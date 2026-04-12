@@ -661,4 +661,45 @@ onUnmounted(() => {
 .slide-in-enter-active, .slide-in-leave-active { transition:all .25s cubic-bezier(.16,1,.3,1); }
 .slide-in-enter-from { opacity:0; transform:translateX(16px); }
 .slide-in-leave-to   { opacity:0; transform:translateX(16px); }
+
+@media (max-width: 900px) {
+  .sim-body { grid-template-columns: 1fr; }
+  .workbench { display: none; }
+}
+
+@media (max-width: 768px) {
+  .sim-topbar { padding: 0 12px; gap: 8px; }
+  .sim-topic-label { font-size: 12px; }
+  .topbar-tabs { gap: 2px; }
+  .tab-btn { padding: 4px 10px; font-size: 9px; }
+  .topbar-right .btn-ghost { display: none; }
+
+  /* On mobile default to Debate tab only */
+  .sim-main { flex-direction: column; }
+  .panel-wrap { min-height: 300px; }
+
+  /* Make graph shorter on mobile */
+  .graph-area { min-height: 280px; max-height: 320px; }
+
+  /* Agent detail panel full width on mobile */
+  .agent-panel {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    padding: 20px 16px;
+  }
+
+  /* Log */
+  .sys-log.expanded { height: 120px; }
+}
+
+@media (max-width: 480px) {
+  .sim-topbar { height: 46px; }
+  .tab-btn { padding: 3px 8px; font-size: 9px; }
+  .panel-header { padding: 8px 12px; }
+  .debate-scroll { padding: 12px; }
+  .statement { padding: 8px 10px; }
+  .stmt-text { font-size: 11px; }
+}
 </style>
