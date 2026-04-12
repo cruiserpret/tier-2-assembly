@@ -280,7 +280,7 @@ const debate        = ref(null)
 const loading       = ref(true)
 const showLoader = ref(true)
 const polling       = ref(false)
-const activeTab     = ref('Split')
+const activeTab = ref('Debate')
 const selectedAgent = ref(null)
 const hoveredAgent  = ref(null)
 const ttX           = ref(0)
@@ -694,12 +694,52 @@ onUnmounted(() => {
   .sys-log.expanded { height: 120px; }
 }
 
-@media (max-width: 480px) {
-  .sim-topbar { height: 46px; }
-  .tab-btn { padding: 3px 8px; font-size: 9px; }
-  .panel-header { padding: 8px 12px; }
-  .debate-scroll { padding: 12px; }
+@media (max-width: 768px) {
+  /* Topbar */
+  .sim-topbar { padding: 0 12px; height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
+  .sim-topic-label { font-size: 11px; width: 100%; }
+  .topbar-badges { order: -1; }
+  .topbar-tabs { order: 2; width: 100%; justify-content: center; }
+  .tab-btn { flex: 1; text-align: center; padding: 6px 4px; font-size: 9px; }
+  .topbar-right { order: 1; margin-left: auto; }
+  .topbar-right .btn-ghost { display: none; }
+
+  /* Body — single column, no workbench */
+  .sim-body { grid-template-columns: 1fr; }
+  .workbench { display: none; }
+
+  /* In Split mode on mobile, stack vertically */
+  .sim-main { flex-direction: column; }
+  .panel-wrap { min-height: 0; }
+  .panel-wrap.half { flex: none; }
+
+  /* Graph gets fixed height on mobile */
+  .graph-area { height: 300px; min-height: 300px; }
+
+  /* Debate scroll */
+  .debate-scroll { padding: 10px; max-height: 60vh; }
   .statement { padding: 8px 10px; }
-  .stmt-text { font-size: 11px; }
+  .stmt-text { font-size: 12px; }
+  .round-label { font-size: 11px; }
+
+  /* Agent panel slides up from bottom */
+  .agent-panel {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 16px 32px;
+    z-index: 300;
+  }
+
+  /* Log */
+  .sys-log { height: 32px; }
+  .sys-log.expanded { height: 120px; }
+  .log-body { height: 88px; }
+}
+
+@media (max-width: 480px) {
+  .graph-legend { gap: 8px; padding: 5px 10px; font-size: 9px; }
+  .legend-dot { width: 6px; height: 6px; }
 }
 </style>
