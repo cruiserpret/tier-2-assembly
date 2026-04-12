@@ -260,11 +260,89 @@
 
         <p class="launch-hint mono">Assembly will ingest real-world data, generate agents, and run a structured debate.</p>
       </div>
+    </section>
 
-      <div class="feature-pills">
-        <div class="pill" v-for="f in features" :key="f.label">
-          <span class="pill-dot" :style="`background:${f.color}`"></span>
-          <span>{{ f.label }}</span>
+    <!-- ── GOD'S EYE VIEW PREVIEW ── -->
+    <section class="gev-section fade-up">
+      <div class="gev-header">
+        <div class="gev-eyebrow mono">
+          <span style="color:var(--accent);">◈</span>
+          The deliverable
+        </div>
+        <h2 class="gev-title display">GOD'S EYE VIEW</h2>
+        <p class="gev-desc">
+          After every simulation, Assembly produces a synthesis report —
+          who shifted, what argument was decisive, and where public opinion is actually headed.
+          This is what you're buying.
+        </p>
+      </div>
+
+      <div class="gev-window">
+        <div class="gev-content">
+          <div class="gev-topic mono">Topic: "Should TikTok be banned in the USA?"</div>
+
+          <div class="gev-summary-block">
+            <div class="gev-block-label mono">Executive Summary</div>
+            <p class="gev-summary-text">
+              The simulation revealed strong convergence toward a conditional ban over 3 rounds.
+              National security arguments proved decisive — 4 of 6 agents revised their position
+              after Elena Vasquez's intelligence-sharing evidence. The holdouts cited free speech
+              concerns but acknowledged they were in the minority.
+            </p>
+          </div>
+
+          <div class="gev-trajectory-block">
+            <div class="gev-block-label mono">Predicted Trajectory</div>
+            <div class="gev-trajectory">
+              <span class="gev-arrow">⟶</span>
+              <span>Public opinion converges toward a targeted device ban within 12 months,
+              with bipartisan support emerging around national security framing rather than
+              censorship concerns.</span>
+            </div>
+          </div>
+
+          <div class="gev-decisive">
+            <div class="gev-block-label mono">Decisive Argument</div>
+            <div class="gev-arg-card">
+              <div class="gev-arg-who">
+                <div class="sm-avatar avatar-for">E</div>
+                <span class="mono" style="font-size:11px;">Elena Vasquez</span>
+                <span class="tag tag-for" style="font-size:9px;padding:2px 6px;">for</span>
+                <span class="mono muted" style="font-size:10px;margin-left:auto;">Influenced 4 agents</span>
+              </div>
+              <p class="gev-arg-text">
+                "15 countries have already restricted TikTok based on classified intelligence
+                briefings the public hasn't seen. The US is late to act, not early."
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="gev-stats">
+          <div class="gev-stat-header mono">Outcome Stats</div>
+          <div class="gev-big-stat">
+            <span class="gev-big-num display accent">4</span>
+            <span class="mono muted" style="font-size:10px;">agents shifted</span>
+          </div>
+          <div class="gev-shift-bar-wrap">
+            <div class="gev-shift-bar">
+              <div class="gev-shift-fill" style="width:67%"></div>
+            </div>
+            <span class="mono muted" style="font-size:10px;margin-top:4px;">67% shift rate</span>
+          </div>
+          <div class="divider"></div>
+          <div class="gev-agents">
+            <div class="gev-block-label mono">Agent Journey</div>
+            <div class="gev-agent-row" v-for="a in gevAgents" :key="a.name">
+              <div class="sm-avatar" :class="`avatar-${a.stance}`">{{ a.name.charAt(0) }}</div>
+              <span class="gev-agent-name">{{ a.name }}</span>
+              <span class="gev-badge" :class="a.shifted ? 'shifted-badge' : 'held-badge'">
+                {{ a.shifted ? '↻' : '—' }}
+              </span>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="gev-cta-note mono">Every simulation produces this report automatically.</div>
         </div>
       </div>
     </section>
