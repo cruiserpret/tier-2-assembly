@@ -80,7 +80,6 @@
               <div class="tt-name">{{ hoveredAgent.name }}</div>
               <div class="tag" :class="`tag-${hoveredAgent.stance}`" style="margin-bottom:6px;">{{ hoveredAgent.stance }}</div>
               <div class="tt-opinion">{{ hoveredAgent.opinion?.slice(0,110) }}{{ hoveredAgent.opinion?.length > 110 ? '...' : '' }}</div>
-              <div class="mono muted" style="font-size:10px;margin-top:6px;">Score: <span class="accent">{{ (hoveredAgent.score*100).toFixed(0) }}</span></div>
             </div>
           </div>
         </div>
@@ -116,7 +115,6 @@
                     <div class="sm-avatar" :class="`avatar-${agent.stance}`">{{ agent.name?.charAt(0) }}</div>
                     <span class="stmt-name mono">{{ agent.name }}</span>
                     <span class="tag" :class="`tag-${agent.stance}`" style="font-size:9px;padding:2px 6px;">{{ agent.stance }}</span>
-                    <span class="mono muted" style="font-size:10px;margin-left:auto;">{{ (agent.score*100).toFixed(0) }}</span>
                     <span v-if="agent.opinion_delta" class="mono" :class="agent.opinion_delta>0?'delta-positive':'delta-negative'" style="font-size:10px;">
                       {{ agent.opinion_delta>0?'▲':'▼' }} {{ Math.abs(agent.opinion_delta).toFixed(2) }}
                     </span>
@@ -384,7 +382,7 @@ function buildGraph() {
     }
   })
 
-  const nodes = allAgents.value.map(a => ({ ...a, r: 10+(a.score||0.5)*12 }))
+  const nodes = allAgents.value.map(a => ({ ...a, r: 16 }))
   const nodeMap = new Map(nodes.map(n=>[n.id,n]))
   const validLinks = links.filter(l=>nodeMap.has(l.source)&&nodeMap.has(l.target)).slice(0,80)
 
