@@ -50,11 +50,11 @@ const showCount = ref(false)
 const count     = ref(0)
 
 const steps = ref([
-  { id:1, label:'Ingesting real-world data from the web', done:false, active:false },
-  { id:2, label:'Building NetworkX knowledge graph',    done:false, active:false },
-  { id:3, label:'Spawning ' + props.numAgents + ' agent personas', done:false, active:false },
-  { id:4, label:'Seeding agent memory with graph context', done:false, active:false },
-  { id:5, label:'Calibrating debate engine',            done:false, active:false },
+  { id:1, label:'Ingesting real-world data from the web',        done:false, active:false },
+  { id:2, label:'Building NetworkX knowledge graph',              done:false, active:false },
+  { id:3, label:`Spawning ${props.numAgents} agent personas`,     done:false, active:false },
+  { id:4, label:'Seeding agent memory with graph context',        done:false, active:false },
+  { id:5, label:'Calibrating debate engine',                      done:false, active:false },
 ])
 
 const timers = []
@@ -63,11 +63,13 @@ const t = (fn, ms) => timers.push(setTimeout(fn, ms))
 onMounted(() => {
   t(() => { steps.value[0].active = true; label.value = 'Ingesting real-world data...'; pct.value = 8 }, 200)
   t(() => { steps.value[0].done = true; steps.value[0].active = false; pct.value = 22 }, 900)
+
   t(() => { steps.value[1].active = true; label.value = 'Building knowledge graph...'; pct.value = 28 }, 1000)
   t(() => { steps.value[1].done = true; steps.value[1].active = false; pct.value = 42 }, 2100)
+
   t(() => {
     steps.value[2].active = true
-    label.value = 'Spawning ' + props.numAgents + ' agents...'
+    label.value = `Spawning ${props.numAgents} agents...`
     showCount.value = true
     pct.value = 48
     let c = 0
@@ -78,11 +80,20 @@ onMounted(() => {
     }, 80)
     timers.push(iv)
   }, 2200)
-  t(() => { steps.value[2].done = true; steps.value[2].active = false; count.value = props.numAgents; pct.value = 65 }, 3600)
+
+  t(() => {
+    steps.value[2].done = true
+    steps.value[2].active = false
+    count.value = props.numAgents
+    pct.value = 65
+  }, 3600)
+
   t(() => { steps.value[3].active = true; label.value = 'Seeding agent memory...'; pct.value = 72 }, 3700)
   t(() => { steps.value[3].done = true; steps.value[3].active = false; pct.value = 84 }, 4500)
+
   t(() => { steps.value[4].active = true; label.value = 'Calibrating debate engine...'; pct.value = 90 }, 4600)
   t(() => { steps.value[4].done = true; steps.value[4].active = false; pct.value = 100; label.value = 'Assembly ready.' }, 5400)
+
   t(() => emit('done'), 6000)
 })
 
@@ -93,7 +104,7 @@ onUnmounted(() => timers.forEach(clearTimeout))
 .ls-overlay { position:fixed; inset:0; background:var(--bg); z-index:1000; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 .ls-scan { position:absolute; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(200,255,87,0.4),transparent); animation:scan 3s linear infinite; }
 @keyframes scan { from{top:-1px} to{top:100%} }
-.ls-box { display:flex; flex-direction:column; align-items:center; width:420px; z-index:2; animation:fadeUp 0.5s ease both; }
+.ls-box { display:flex; flex-direction:column; align-items:center; width:420px; z-index:2; animation:fadeUp 0.5s ease both; padding: 0 20px; }
 .ls-logo { font-size:60px; color:var(--accent); letter-spacing:0.06em; line-height:1; margin-bottom:6px; }
 .ls-ver  { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); margin-bottom:28px; }
 .ls-divider { width:100%; height:1px; background:var(--border); margin-bottom:24px; }

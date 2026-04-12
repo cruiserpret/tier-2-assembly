@@ -1,10 +1,5 @@
 <template>
   <div class="sim-layout">
-  <LoadingScreen
-  v-if="showLoader"
-  :numAgents="20"
-  @done="showLoader = false"
-/>
 
     <!-- ── TOP BAR ─────────────────────────────────────── -->
     <div class="sim-topbar">
@@ -270,7 +265,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import * as d3 from 'd3'
-import LoadingScreen from '../components/LoadingScreen.vue'
 import { assembly } from '../api/assembly.js'
 
 const props = defineProps({ id: String })
@@ -278,9 +272,8 @@ const props = defineProps({ id: String })
 // ── Refs ──────────────────────────────────────────────────
 const debate        = ref(null)
 const loading       = ref(true)
-const showLoader = ref(true)
 const polling       = ref(false)
-const activeTab = ref('Debate')
+const activeTab     = ref('Split')
 const selectedAgent = ref(null)
 const hoveredAgent  = ref(null)
 const ttX           = ref(0)
@@ -661,85 +654,4 @@ onUnmounted(() => {
 .slide-in-enter-active, .slide-in-leave-active { transition:all .25s cubic-bezier(.16,1,.3,1); }
 .slide-in-enter-from { opacity:0; transform:translateX(16px); }
 .slide-in-leave-to   { opacity:0; transform:translateX(16px); }
-
-@media (max-width: 900px) {
-  .sim-body { grid-template-columns: 1fr; }
-  .workbench { display: none; }
-}
-
-@media (max-width: 768px) {
-  .sim-topbar { padding: 0 12px; gap: 8px; }
-  .sim-topic-label { font-size: 12px; }
-  .topbar-tabs { gap: 2px; }
-  .tab-btn { padding: 4px 10px; font-size: 9px; }
-  .topbar-right .btn-ghost { display: none; }
-
-  /* On mobile default to Debate tab only */
-  .sim-main { flex-direction: column; }
-  .panel-wrap { min-height: 300px; }
-
-  /* Make graph shorter on mobile */
-  .graph-area { min-height: 280px; max-height: 320px; }
-
-  /* Agent detail panel full width on mobile */
-  .agent-panel {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    width: 100%;
-    border-radius: 12px 12px 0 0;
-    padding: 20px 16px;
-  }
-
-  /* Log */
-  .sys-log.expanded { height: 120px; }
-}
-
-@media (max-width: 768px) {
-  /* Topbar */
-  .sim-topbar { padding: 0 12px; height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
-  .sim-topic-label { font-size: 11px; width: 100%; }
-  .topbar-badges { order: -1; }
-  .topbar-tabs { order: 2; width: 100%; justify-content: center; }
-  .tab-btn { flex: 1; text-align: center; padding: 6px 4px; font-size: 9px; }
-  .topbar-right { order: 1; margin-left: auto; }
-  .topbar-right .btn-ghost { display: none; }
-
-  /* Body — single column, no workbench */
-  .sim-body { grid-template-columns: 1fr; }
-  .workbench { display: none; }
-
-  /* In Split mode on mobile, stack vertically */
-  .sim-main { flex-direction: column; }
-  .panel-wrap { min-height: 0; }
-  .panel-wrap.half { flex: none; }
-
-  /* Graph gets fixed height on mobile */
-  .graph-area { height: 300px; min-height: 300px; }
-
-  /* Debate scroll */
-  .debate-scroll { padding: 10px; max-height: 60vh; }
-  .statement { padding: 8px 10px; }
-  .stmt-text { font-size: 12px; }
-  .round-label { font-size: 11px; }
-
-  /* Agent panel slides up from bottom */
-  .agent-panel {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    width: 100%;
-    border-radius: 16px 16px 0 0;
-    padding: 20px 16px 32px;
-    z-index: 300;
-  }
-
-  /* Log */
-  .sys-log { height: 32px; }
-  .sys-log.expanded { height: 120px; }
-  .log-body { height: 88px; }
-}
-
-@media (max-width: 480px) {
-  .graph-legend { gap: 8px; padding: 5px 10px; font-size: 9px; }
-  .legend-dot { width: 6px; height: 6px; }
-}
 </style>
