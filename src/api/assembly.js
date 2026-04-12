@@ -8,27 +8,19 @@ const BASE = import.meta.env.VITE_API_URL
 let startInFlight = false
 
 async function request(url, options = {}) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 600000) // 10 min timeout
-
-  try {
-    const res = await fetch(`${ BASE }${ url }`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
-        ...options.headers,
-      },
-      signal: controller.signal,
-      ...options,
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }))
-      throw new Error(err.detail || `HTTP ${ res.status }`)
-    }
-    return res.json()
-  } finally {
-    clearTimeout(timeout)
+  const res = await fetch(`${ BASE }${ url }`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+      ...options.headers,
+    },
+    ...options,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || `HTTP ${ res.status }`)
   }
+  return res.json()
 }
 
 export const assembly = {
