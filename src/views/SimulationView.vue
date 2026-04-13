@@ -280,7 +280,8 @@ const debate        = ref(null)
 const loading       = ref(true)
 const showLoader    = ref(true)
 const polling       = ref(false)
-const activeTab     = ref('Debate')
+const reportFetched = ref(false)
+const activeTab     = ref('Split')
 const selectedAgent = ref(null)
 const hoveredAgent  = ref(null)
 const ttX           = ref(0)
@@ -350,11 +351,16 @@ function addLog(msg, type='info') {
 // ── Steps updater ─────────────────────────────────────────
 function updateSteps() {
   const rounds = debate.value?.rounds?.length || 0
+  const totalRounds = debate.value?.rounds?.length
+    ? Math.max(...debate.value.rounds.map(r => r.round))
+    : 0
+
   steps.value[0].status = 'complete'
   steps.value[1].status = 'complete'
   steps.value[2].status = allAgents.value.length ? 'complete' : 'active'
-  steps.value[3].status = rounds>0 ? (rounds>=3?'complete':'active') : 'pending'
-  steps.value[4].status = rounds>=3 ? 'active' : 'pending'
+  steps.value[3].status = rounds > 0 ? 'complete' : 'active'
+  steps.value[4].status = reportFetched.value ? 'complete'
+    : rounds > 0 ? 'active' : 'pending'
 }
 
 // ── D3 Graph ──────────────────────────────────────────────
@@ -467,7 +473,23 @@ async function refreshDebate() {
   try {
     debate.value = await assembly.getDebate(props.id)
     addLog(`${debate.value.rounds?.length||0} rounds · ${allAgents.value.length} agents`, 'success')
+
+    // Try fetching report — if it exists, mark God's Eye complete
+    if (debate.value.rounds?.length > 0 && !reportFetched.value) {
+      try {
+        await assembly.getReport(props.id)
+        reportFetched.value = true
+        addLog('God\'s Eye View report ready', 'success')
+      } catch {}
+    }
+
     updateSteps()
+
+    // Switch to Split view once debate data arrives for first time
+    if (debate.value.rounds?.length > 0 && activeTab.value === 'Split') {
+      activeTab.value = 'Split'
+    }
+
     nextTick(buildGraph)
   } catch(e) {
     addLog(`Error: ${e.message}`, 'error')

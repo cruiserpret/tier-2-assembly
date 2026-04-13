@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({ numAgents: { type: Number, default: 20 } })
 const emit  = defineEmits(['done'])
@@ -49,18 +49,26 @@ const pct       = ref(0)
 const showCount = ref(false)
 const count     = ref(0)
 
+// Computed so it always reflects the actual prop value
+const agentStepLabel = computed(() => `Spawning ${props.numAgents} agent personas`)
+
 const steps = ref([
-  { id:1, label:'Ingesting real-world data from the web',        done:false, active:false },
-  { id:2, label:'Building NetworkX knowledge graph',              done:false, active:false },
-  { id:3, label:`Spawning ${props.numAgents} agent personas`,     done:false, active:false },
-  { id:4, label:'Seeding agent memory with graph context',        done:false, active:false },
-  { id:5, label:'Calibrating debate engine',                      done:false, active:false },
+  { id:1, label:'Ingesting real-world data from the web',   done:false, active:false },
+  { id:2, label:'Building NetworkX knowledge graph',         done:false, active:false },
+  { id:3, label:'',                                          done:false, active:false },
+  { id:4, label:'Seeding agent memory with graph context',   done:false, active:false },
+  { id:5, label:'Calibrating debate engine',                 done:false, active:false },
 ])
+
+// Keep step 3 label in sync with the prop
+const syncLabel = () => { steps.value[2].label = agentStepLabel.value }
 
 const timers = []
 const t = (fn, ms) => timers.push(setTimeout(fn, ms))
 
 onMounted(() => {
+  syncLabel()
+
   t(() => { steps.value[0].active = true; label.value = 'Ingesting real-world data...'; pct.value = 8 }, 200)
   t(() => { steps.value[0].done = true; steps.value[0].active = false; pct.value = 22 }, 900)
 
@@ -68,6 +76,7 @@ onMounted(() => {
   t(() => { steps.value[1].done = true; steps.value[1].active = false; pct.value = 42 }, 2100)
 
   t(() => {
+    syncLabel()
     steps.value[2].active = true
     label.value = `Spawning ${props.numAgents} agents...`
     showCount.value = true
@@ -104,7 +113,7 @@ onUnmounted(() => timers.forEach(clearTimeout))
 .ls-overlay { position:fixed; inset:0; background:var(--bg); z-index:1000; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 .ls-scan { position:absolute; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(200,255,87,0.4),transparent); animation:scan 3s linear infinite; }
 @keyframes scan { from{top:-1px} to{top:100%} }
-.ls-box { display:flex; flex-direction:column; align-items:center; width:420px; z-index:2; animation:fadeUp 0.5s ease both; padding: 0 20px; }
+.ls-box { display:flex; flex-direction:column; align-items:center; width:420px; z-index:2; animation:fadeUp 0.5s ease both; padding:0 20px; }
 .ls-logo { font-size:60px; color:var(--accent); letter-spacing:0.06em; line-height:1; margin-bottom:6px; }
 .ls-ver  { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); margin-bottom:28px; }
 .ls-divider { width:100%; height:1px; background:var(--border); margin-bottom:24px; }
