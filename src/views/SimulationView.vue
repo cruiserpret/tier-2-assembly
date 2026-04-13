@@ -4,7 +4,7 @@
     <LoadingScreen
       v-if="showLoader"
       :numAgents="numAgents"
-      @done="showLoader = false"
+      @done="onLoaderDone"
     />
 
     <!-- TOP BAR -->
@@ -275,12 +275,20 @@ const props = defineProps({ id: String })
 const route     = useRoute()
 const numAgents = parseInt(route.query.agents) || 20
 
+// ── Loader — skip if this sim was already seen ─────────────
+const loaderKey  = `assembly_loader_${props.id}`
+const showLoader = ref(!sessionStorage.getItem(loaderKey))
+
+function onLoaderDone() {
+  showLoader.value = false
+  sessionStorage.setItem(loaderKey, '1')
+}
+
 // ── Refs ──────────────────────────────────────────────────
 const debate        = ref(null)
 const loading       = ref(true)
-const showLoader    = ref(true)
-const polling       = ref(false)
 const reportFetched = ref(false)
+const polling       = ref(false)
 const activeTab     = ref('Split')
 const selectedAgent = ref(null)
 const hoveredAgent  = ref(null)
@@ -348,31 +356,27 @@ function addLog(msg, type='info') {
   nextTick(() => { if (logBody.value) logBody.value.scrollTop = logBody.value.scrollHeight })
 }
 
-// ── Steps updater ─────────────────────────────────────────
+// ── Steps updater — sequential, never simultaneous ────────
 function updateSteps() {
-  const rounds = debate.value?.rounds?.length || 0
+  const rounds    = debate.value?.rounds?.length || 0
   const hasAgents = allAgents.value.length > 0
 
   steps.value[0].status = 'complete'
   steps.value[1].status = 'complete'
 
   if (!hasAgents) {
-    // Still generating agents
     steps.value[2].status = 'active'
     steps.value[3].status = 'pending'
     steps.value[4].status = 'pending'
   } else if (hasAgents && rounds === 0) {
-    // Agents done, debate not started yet
     steps.value[2].status = 'complete'
     steps.value[3].status = 'active'
     steps.value[4].status = 'pending'
   } else if (rounds > 0 && !reportFetched.value) {
-    // Debate running or done, report not ready
     steps.value[2].status = 'complete'
     steps.value[3].status = 'complete'
     steps.value[4].status = 'active'
   } else if (reportFetched.value) {
-    // Everything done
     steps.value[2].status = 'complete'
     steps.value[3].status = 'complete'
     steps.value[4].status = 'complete'
@@ -382,7 +386,7 @@ function updateSteps() {
 // ── D3 Graph ──────────────────────────────────────────────
 const stanceColor = { for:'#3EE8A0', against:'#FF4D6D', neutral:'#7A8BA6' }
 const stanceFill  = { for:'url(#ng-for)', against:'url(#ng-against)', neutral:'url(#ng-neutral)' }
-const NODE_R      = 16  // fixed equal size for all nodes
+const NODE_R      = 16
 
 function buildGraph() {
   if (!graphSvg.value || !graphArea.value || !allAgents.value.length) return
@@ -411,7 +415,6 @@ function buildGraph() {
     }
   })
 
-  // Equal size nodes — r is fixed
   const nodes = allAgents.value.map(a => ({ ...a, r: NODE_R }))
   const nodeMap = new Map(nodes.map(n=>[n.id,n]))
   const validLinks = links.filter(l=>nodeMap.has(l.source)&&nodeMap.has(l.target)).slice(0,80)
@@ -482,7 +485,7 @@ function buildGraph() {
 
 watch(allAgents, () => nextTick(buildGraph), { deep:true })
 
-// ── API — only refreshDebate here, never startSimulation ───
+// ── API ───────────────────────────────────────────────────
 async function refreshDebate() {
   polling.value = true
   addLog(`Polling simulation ${props.id.slice(0,8)}...`)
@@ -490,22 +493,16 @@ async function refreshDebate() {
     debate.value = await assembly.getDebate(props.id)
     addLog(`${debate.value.rounds?.length||0} rounds · ${allAgents.value.length} agents`, 'success')
 
-    // Try fetching report — if it exists, mark God's Eye complete
+    // Try fetching report — marks God's Eye complete
     if (debate.value.rounds?.length > 0 && !reportFetched.value) {
       try {
         await assembly.getReport(props.id)
         reportFetched.value = true
-        addLog('God\'s Eye View report ready', 'success')
+        addLog("God's Eye View report ready", 'success')
       } catch {}
     }
 
     updateSteps()
-
-    // Switch to Split view once debate data arrives for first time
-    if (debate.value.rounds?.length > 0 && activeTab.value === 'Split') {
-      activeTab.value = 'Split'
-    }
-
     nextTick(buildGraph)
   } catch(e) {
     addLog(`Error: ${e.message}`, 'error')
@@ -543,7 +540,7 @@ function selectAgent(agent) {
   if (agent) addLog(`Selected: ${agent.name} (${agent.stance})`)
 }
 
-// ── Lifecycle — NO startSimulation call here ───────────────
+// ── Lifecycle ─────────────────────────────────────────────
 onMounted(async () => {
   addLog('Simulation view initialised.')
   steps.value[0].status = 'active'
