@@ -351,16 +351,32 @@ function addLog(msg, type='info') {
 // ── Steps updater ─────────────────────────────────────────
 function updateSteps() {
   const rounds = debate.value?.rounds?.length || 0
-  const totalRounds = debate.value?.rounds?.length
-    ? Math.max(...debate.value.rounds.map(r => r.round))
-    : 0
+  const hasAgents = allAgents.value.length > 0
 
   steps.value[0].status = 'complete'
   steps.value[1].status = 'complete'
-  steps.value[2].status = allAgents.value.length ? 'complete' : 'active'
-  steps.value[3].status = rounds > 0 ? 'complete' : 'active'
-  steps.value[4].status = reportFetched.value ? 'complete'
-    : rounds > 0 ? 'active' : 'pending'
+
+  if (!hasAgents) {
+    // Still generating agents
+    steps.value[2].status = 'active'
+    steps.value[3].status = 'pending'
+    steps.value[4].status = 'pending'
+  } else if (hasAgents && rounds === 0) {
+    // Agents done, debate not started yet
+    steps.value[2].status = 'complete'
+    steps.value[3].status = 'active'
+    steps.value[4].status = 'pending'
+  } else if (rounds > 0 && !reportFetched.value) {
+    // Debate running or done, report not ready
+    steps.value[2].status = 'complete'
+    steps.value[3].status = 'complete'
+    steps.value[4].status = 'active'
+  } else if (reportFetched.value) {
+    // Everything done
+    steps.value[2].status = 'complete'
+    steps.value[3].status = 'complete'
+    steps.value[4].status = 'complete'
+  }
 }
 
 // ── D3 Graph ──────────────────────────────────────────────
