@@ -25,7 +25,8 @@ async function request(url, options = {}) {
 
 export const assembly = {
 
-  async startSimulation({ topic, num_agents = 20, num_rounds = 3, uploads = [] }) {
+  // ── context is now passed through to backend (Tier 1 feature) ──
+  async startSimulation({ topic, context = '', num_agents = 20, num_rounds = 3, uploads = [] }) {
     if (startInFlight) {
       throw new Error('A simulation is already starting. Please wait.')
     }
@@ -33,7 +34,7 @@ export const assembly = {
     try {
       return await request('/simulation/start', {
         method: 'POST',
-        body: JSON.stringify({ topic, num_agents, num_rounds, uploads }),
+        body: JSON.stringify({ topic, context, num_agents, num_rounds, uploads }),
       })
     } finally {
       startInFlight = false
@@ -42,6 +43,11 @@ export const assembly = {
 
   getDebate(simulationId) {
     return request(`/simulation/${ simulationId }/debate`)
+  },
+
+  // ── Returns status + error_message when simulation fails ──
+  getStatus(simulationId) {
+    return request(`/simulation/${ simulationId }/status`)
   },
 
   getReport(simulationId) {

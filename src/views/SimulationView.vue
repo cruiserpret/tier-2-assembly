@@ -43,6 +43,16 @@
     <div class="sim-body">
       <div class="sim-main">
 
+        <!-- ── Tier 1: simulation error banner ── -->
+        <div v-if="simError" class="sim-error-banner mono">
+          <span class="sim-error-icon">⚠</span>
+          <div style="flex:1;">
+            <div class="sim-error-title">Simulation failed</div>
+            <div class="sim-error-msg">{{ simError }}</div>
+          </div>
+          <router-link to="/" class="btn btn-primary" style="font-size:10px;padding:6px 14px;flex-shrink:0;">+ New Simulation</router-link>
+        </div>
+
         <!-- GRAPH PANEL -->
         <div v-show="activeTab === 'Graph' || activeTab === 'Split'"
           class="panel-wrap" :class="{ half: activeTab === 'Split' }">
@@ -64,7 +74,7 @@
               <g ref="nodesG"></g>
             </svg>
 
-            <div v-if="!allAgents.length" class="graph-empty">
+            <div v-if="!allAgents.length && !simError" class="graph-empty">
               <div class="graph-empty-icon">◎</div>
               <div class="mono">Waiting for agents...</div>
             </div>
@@ -297,6 +307,7 @@ const ttY           = ref(0)
 const logExpanded   = ref(false)
 const logLines      = ref([])
 const logBody       = ref(null)
+const simError      = ref('')   // ── Tier 1: simulation error message
 
 const graphSvg  = ref(null)
 const graphArea = ref(null)
@@ -356,7 +367,7 @@ function addLog(msg, type='info') {
   nextTick(() => { if (logBody.value) logBody.value.scrollTop = logBody.value.scrollHeight })
 }
 
-// ── Steps updater — sequential, never simultaneous ────────
+// ── Steps updater ─────────────────────────────────────────
 function updateSteps() {
   const rounds    = debate.value?.rounds?.length || 0
   const hasAgents = allAgents.value.length > 0
@@ -490,10 +501,22 @@ async function refreshDebate() {
   polling.value = true
   addLog(`Polling simulation ${props.id.slice(0,8)}...`)
   try {
+    // ── Tier 1: check status first for error_message ──────
+    const status = await assembly.getStatus(props.id)
+    if (status.status === 'failed') {
+      const msg = status.error_message || status.error || 'Simulation failed. Please try again or rephrase your question.'
+      addLog(`Failed: ${msg}`, 'error')
+      simError.value = msg
+      polling.value = false
+      loading.value = false
+      clearInterval(pollTimer)
+      return
+    }
+    // ─────────────────────────────────────────────────────
+
     debate.value = await assembly.getDebate(props.id)
     addLog(`${debate.value.rounds?.length||0} rounds · ${allAgents.value.length} agents`, 'success')
 
-    // Try fetching report — marks God's Eye complete
     if (debate.value.rounds?.length > 0 && !reportFetched.value) {
       try {
         await assembly.getReport(props.id)
@@ -551,7 +574,7 @@ onMounted(async () => {
     if (graphArea.value) resizeObs.observe(graphArea.value)
   })
   pollTimer = setInterval(() => {
-    if (!allAgents.value.length || (debate.value?.rounds?.length||0) < 3) {
+    if (!simError.value && (!allAgents.value.length || (debate.value?.rounds?.length||0) < 3)) {
       refreshDebate()
     }
   }, 8000)
@@ -576,8 +599,29 @@ onUnmounted(() => {
 .tab-btn { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; padding:5px 14px; border-radius:4px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; transition:all var(--transition); }
 .tab-btn.active { background:var(--surface-2); color:var(--text); border:1px solid var(--border-hi); }
 
-.sim-body { flex:1; display:grid; grid-template-columns:1fr 256px; overflow:hidden; }
+.sim-body { flex:1; display:grid; grid-template-columns:1fr 256px; overflow:hidden; position:relative; }
 .sim-main { display:flex; overflow:hidden; }
+
+/* ── Tier 1: error banner ── */
+.sim-error-banner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface-2);
+  border: 1px solid rgba(255,77,109,0.3);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  max-width: 480px;
+  width: 90%;
+  z-index: 50;
+}
+.sim-error-icon { font-size: 24px; color: var(--against); flex-shrink: 0; }
+.sim-error-title { font-size: 12px; color: var(--against); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+.sim-error-msg { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
 
 .panel-wrap { display:flex; flex-direction:column; flex:1; overflow:hidden; border-right:1px solid var(--border); }
 .panel-wrap.half { flex:1; }

@@ -146,10 +146,41 @@
         </div>
         <div class="divider" style="margin:16px 0;"></div>
 
+        <!-- ── UCSD EXAMPLE QUESTIONS ── -->
+        <div class="examples-row">
+          <span class="mono examples-label">Try these →</span>
+          <div class="examples-chips">
+            <button
+              v-for="q in exampleQuestions"
+              :key="q.topic"
+              class="example-chip mono"
+              :disabled="loading"
+              @click="fillExample(q)"
+            >{{ q.label }}</button>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label mono">Topic</label>
           <textarea v-model="form.topic" class="textarea"
             placeholder="Should AI be regulated by governments?" rows="3" :disabled="loading"></textarea>
+        </div>
+
+        <!-- ── CONTEXT FIELD (Tier 1 feature) ── -->
+        <div class="form-group">
+          <label class="form-label mono">
+            Context
+            <span class="form-label-hint mono">optional — helps Assembly focus on your audience</span>
+          </label>
+          <textarea
+            v-model="form.context"
+            class="textarea context-area"
+            placeholder="Describe your product, add background, or specify your audience. E.g. 'UCSD campus policy question. Students want extended library hours during finals week.'"
+            rows="2"
+            :disabled="loading"
+            maxlength="500"
+          ></textarea>
+          <div class="context-counter mono">{{ form.context.length }}/500</div>
         </div>
 
         <div class="form-row">
@@ -271,9 +302,43 @@ import { useRouter } from 'vue-router'
 import { assembly } from '../api/assembly.js'
 
 const router  = useRouter()
-const form    = ref({ topic: '', num_agents: 20, num_rounds: 3 })
+const form    = ref({ topic: '', context: '', num_agents: 20, num_rounds: 3 })
 const loading = ref(false)
 const error   = ref('')
+
+// ── UCSD Example Questions (Tier 1 feature) ──────────────
+const exampleQuestions = [
+  {
+    label: 'Geisel 24/7?',
+    topic: 'Should Geisel library be open 24/7?',
+    context: 'UCSD campus policy question. Geisel is the main library at UC San Diego. Students want extended hours especially during finals week.',
+  },
+  {
+    label: 'Mental health funding?',
+    topic: 'Should UCSD increase mental health funding on campus?',
+    context: 'UCSD campus policy. UC San Diego student wellness services are currently under-resourced relative to student demand.',
+  },
+  {
+    label: 'Diversity training?',
+    topic: 'Should UCSD mandate diversity training for all students?',
+    context: 'UCSD campus policy question regarding required diversity, equity and inclusion training for undergraduates.',
+  },
+  {
+    label: 'Dining hall hours?',
+    topic: 'Should UCSD extend dining hall hours past midnight?',
+    context: 'UCSD campus quality-of-life question. Students who study late have limited food options on campus after 10pm.',
+  },
+  {
+    label: 'AI study tool?',
+    topic: 'Would UCSD students pay for an AI-powered study tool?',
+    context: 'Product market research for UCSD students. Target price: $10-15/month. Competitor: existing tutoring services and ChatGPT.',
+  },
+]
+
+function fillExample(q) {
+  form.value.topic   = q.topic
+  form.value.context = q.context
+}
 
 const gevAgents = [
   { name:'Sarah',  stance:'for',     shifted:false },
@@ -289,7 +354,12 @@ async function launch() {
   loading.value = true
   error.value = ''
   try {
-    const res = await assembly.startSimulation(form.value)
+    const res = await assembly.startSimulation({
+      topic:      form.value.topic,
+      context:    form.value.context,   // ← Tier 1: pass context to backend
+      num_agents: form.value.num_agents,
+      num_rounds: form.value.num_rounds,
+    })
     router.push(`/simulation/${res.simulation_id}?agents=${form.value.num_agents}`)
   } catch (e) {
     error.value = e.message || 'Failed to start simulation'
@@ -329,12 +399,12 @@ const demoEdges = [
   { id:'e6', x1:170, y1:150, x2:230, y2:130, shifted:true  },
 ]
 const allStatements = [
-  { id:1, name:'Sarah',  stance:'for',    shifted:false, text:"TikTok's data collection practices present a clear national security risk that cannot be ignored." },
+  { id:1, name:'Sarah',  stance:'for',     shifted:false, text:"TikTok's data collection practices present a clear national security risk that cannot be ignored." },
   { id:2, name:'Marcus', stance:'against', shifted:false, text:"A ban sets a dangerous precedent for government censorship of private platforms." },
-  { id:3, name:'Elena',  stance:'for',    shifted:false, text:"15 countries have already restricted TikTok. The US is late to act on documented threats." },
+  { id:3, name:'Elena',  stance:'for',     shifted:false, text:"15 countries have already restricted TikTok. The US is late to act on documented threats." },
   { id:4, name:'James',  stance:'neutral', shifted:false, text:"I understand both sides. Perhaps mandatory data localization is a middle ground." },
   { id:5, name:'Priya',  stance:'neutral', shifted:true,  text:"Elena's evidence is compelling. I'm revising toward conditional support for a ban." },
-  { id:6, name:'Tom',    stance:'for',    shifted:true,  text:"After this debate, a targeted ban on government devices is the minimum necessary response." },
+  { id:6, name:'Tom',    stance:'for',     shifted:true,  text:"After this debate, a targeted ban on government devices is the minimum necessary response." },
 ]
 
 let demoTimer = null
@@ -433,8 +503,38 @@ onUnmounted(() => clearInterval(demoTimer))
 /* Launch */
 .launch-section { width: 100%; max-width: 620px; margin-bottom: 48px; }
 .launch-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 32px; }
-.form-group { margin-bottom: 24px; }
+
+/* Example questions */
+.examples-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+.examples-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); flex-shrink: 0; margin-top: 4px; }
+.examples-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.example-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: 0.02em;
+}
+.example-chip:hover:not(:disabled) {
+  border-color: rgba(200,255,87,0.3);
+  color: var(--accent);
+  background: rgba(200,255,87,0.06);
+}
+.example-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.form-group { margin-bottom: 20px; }
 .form-label { display: flex; justify-content: space-between; align-items: center; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.form-label-hint { font-size: 10px; text-transform: none; letter-spacing: 0; color: var(--text-dim); }
+
+/* Context field */
+.context-area { font-size: 12px; resize: none; }
+.context-counter { font-size: 10px; color: var(--text-dim); text-align: right; margin-top: 4px; letter-spacing: 0.04em; }
+
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .range { -webkit-appearance: none; width: 100%; height: 2px; background: var(--surface-2); border-radius: 2px; outline: none; cursor: pointer; margin-bottom: 6px; }
 .range::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px rgba(200,255,87,0.5); transition: transform var(--transition); }
@@ -489,6 +589,7 @@ onUnmounted(() => clearInterval(demoTimer))
   .demo-report { border-left: none; border-top: 1px solid var(--border); }
   .gev-window { grid-template-columns: 1fr; }
   .gev-content { border-right: none; border-bottom: 1px solid var(--border); }
+  .examples-row { flex-direction: column; gap: 6px; }
 }
 @media (max-width: 640px) {
   .home { padding: 40px 16px 40px; }
