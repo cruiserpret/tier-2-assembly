@@ -1,6 +1,15 @@
 <template>
   <div class="home">
 
+    <!-- ── BETA DISCLAIMER BANNER ── -->
+    <div class="beta-banner">
+      <span class="beta-tag mono">BETA</span>
+      <span class="beta-text">
+        Assembly is in beta. Each simulation takes <strong>~10 minutes</strong> to run —
+        please keep this tab open while it processes. We appreciate your patience.
+      </span>
+    </div>
+
     <!-- ── HERO ── -->
     <section class="hero">
       <div class="hero-eyebrow fade-up mono">
@@ -185,9 +194,10 @@
 
         <div class="form-row">
           <div class="form-group">
+            <!-- FIX 1: min agents changed from 5 to 10 -->
             <label class="form-label mono">Agents <span class="accent mono">{{ form.num_agents }}</span></label>
-            <input v-model.number="form.num_agents" type="range" min="5" max="50" step="5" class="range" :disabled="loading"/>
-            <div class="range-labels mono"><span>5</span><span>50</span></div>
+            <input v-model.number="form.num_agents" type="range" min="10" max="50" step="5" class="range" :disabled="loading"/>
+            <div class="range-labels mono"><span>10</span><span>50</span></div>
           </div>
           <div class="form-group">
             <label class="form-label mono">Rounds <span class="accent mono">{{ form.num_rounds }}</span></label>
@@ -204,7 +214,10 @@
           {{ loading ? 'Launching...' : 'Launch Simulation' }}
         </button>
 
-        <p class="launch-hint mono">Assembly will ingest real-world data, generate agents, and run a structured debate.</p>
+        <!-- FIX 2: beta time warning below launch button -->
+        <p class="launch-hint mono">
+          ⏱ Simulations take ~10 minutes to complete. Keep this tab open — we'll update in real time.
+        </p>
       </div>
     </section>
 
@@ -359,7 +372,7 @@ async function launch() {
       num_agents: form.value.num_agents,
       num_rounds: form.value.num_rounds,
     })
-    router.push(`/simulation/${res.simulation_id}?agents=${form.value.num_agents}`)
+    router.push(`/simulation/${res.simulation_id}?agents=${form.value.num_agents}&rounds=${form.value.num_rounds}`)
   } catch (e) {
     error.value = e.message || 'Failed to start simulation'
     loading.value = false
@@ -448,9 +461,43 @@ onUnmounted(() => clearInterval(demoTimer))
 </script>
 
 <style scoped>
-.home { min-height: calc(100vh - 56px); display: flex; flex-direction: column; align-items: center; padding: 80px 24px 60px; }
+.home { min-height: calc(100vh - 56px); display: flex; flex-direction: column; align-items: center; padding: 0 24px 60px; }
 
-.hero { text-align: center; max-width: 720px; width: 100%; margin-bottom: 64px; }
+/* ── Beta banner ── */
+.beta-banner {
+  width: 100%;
+  background: rgba(200,255,87,0.06);
+  border-bottom: 1px solid rgba(200,255,87,0.15);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 52px;
+  z-index: 90;
+  backdrop-filter: blur(8px);
+}
+.beta-tag {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: rgba(200,255,87,0.15);
+  border: 1px solid rgba(200,255,87,0.3);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.beta-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.beta-text strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.hero { text-align: center; max-width: 720px; width: 100%; margin-bottom: 64px; padding-top: 60px; }
 .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
 .hero-logo-wrap { position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 32px; }
 .hero-logo-bg { position: absolute; inset: -20px -60px; border: 1px solid rgba(200,255,87,0.08); border-radius: 4px; overflow: hidden; pointer-events: none; }
@@ -499,27 +546,17 @@ onUnmounted(() => clearInterval(demoTimer))
 
 .launch-section { width: 100%; max-width: 620px; margin-bottom: 48px; }
 .launch-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 32px; }
-
 .examples-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
 .examples-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); flex-shrink: 0; margin-top: 4px; }
 .examples-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.example-chip {
-  font-family: var(--mono); font-size: 10px; padding: 4px 10px; border-radius: 100px;
-  border: 1px solid var(--border); background: var(--bg-2); color: var(--text-muted);
-  cursor: pointer; transition: all var(--transition); letter-spacing: 0.02em;
-}
+.example-chip { font-family: var(--mono); font-size: 10px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-muted); cursor: pointer; transition: all var(--transition); letter-spacing: 0.02em; }
 .example-chip:hover:not(:disabled) { border-color: rgba(200,255,87,0.3); color: var(--accent); background: rgba(200,255,87,0.06); }
 .example-chip:disabled { opacity: 0.4; cursor: not-allowed; }
-
 .form-group { margin-bottom: 20px; }
 .form-label { display: flex; justify-content: space-between; align-items: center; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
-
-/* FIX 5 — was var(--text-dim), now var(--text-muted) so students can actually read it */
 .form-label-hint { font-size: 10px; text-transform: none; letter-spacing: 0; color: var(--text-muted); }
-
 .context-area { font-size: 12px; resize: none; }
 .context-counter { font-size: 10px; color: var(--text-muted); text-align: right; margin-top: 4px; letter-spacing: 0.04em; }
-
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .range { -webkit-appearance: none; width: 100%; height: 2px; background: var(--surface-2); border-radius: 2px; outline: none; cursor: pointer; margin-bottom: 6px; }
 .range::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px rgba(200,255,87,0.5); transition: transform var(--transition); }
@@ -528,7 +565,7 @@ onUnmounted(() => clearInterval(demoTimer))
 .error-msg { font-size: 12px; color: var(--against); margin-bottom: 16px; padding: 10px 14px; background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2); border-radius: var(--radius); }
 .launch-btn { width: 100%; justify-content: center; padding: 14px; font-size: 12px; margin-bottom: 12px; }
 .launch-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-.launch-hint { text-align: center; font-size: 10px; color: var(--text-dim); letter-spacing: 0.03em; }
+.launch-hint { text-align: center; font-size: 11px; color: var(--text-muted); letter-spacing: 0.02em; }
 
 .gev-section { width: 100%; max-width: 900px; margin-bottom: 60px; }
 .gev-header { text-align: center; margin-bottom: 24px; }
@@ -572,15 +609,14 @@ onUnmounted(() => clearInterval(demoTimer))
   .gev-window { grid-template-columns: 1fr; }
   .gev-content { border-right: none; border-bottom: 1px solid var(--border); }
   .examples-row { flex-direction: column; gap: 6px; }
+  .beta-banner { flex-direction: column; align-items: flex-start; gap: 6px; }
 }
 @media (max-width: 640px) {
-  .home { padding: 40px 16px 40px; }
-  .hero { margin-bottom: 32px; }
-  .hero-logo-bg { inset: -12px -16px; }
+  .home { padding: 0 16px 40px; }
+  .hero { margin-bottom: 32px; padding-top: 32px; }
   .hero-h1 { font-size: 20px; }
   .hero-sub { font-size: 13px; }
   .stats-row { grid-template-columns: 1fr; gap: 8px; }
-  .hero-stat-card { padding: 14px 12px; }
   .launch-card { padding: 20px 16px; }
   .form-row { grid-template-columns: 1fr; gap: 16px; }
 }
