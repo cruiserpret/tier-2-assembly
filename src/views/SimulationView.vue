@@ -516,9 +516,11 @@ async function refreshDebate() {
   // It is NEVER toggled inside this function except on true completion
 
   try {
+    let status = null  // scoped so it's accessible throughout the function
+
     // 1. Try status endpoint for agent count — gracefully handle if missing
     try {
-      const status = await assembly.getStatus(props.id)
+      status = await assembly.getStatus(props.id)
       if (status?.status === 'failed') {
         simError.value = status.error_message || status.error || 'Simulation failed. Please try again.'
         clearInterval(pollTimer)
@@ -554,7 +556,9 @@ async function refreshDebate() {
     }
 
     // 5. Try fetching report when debate is done
-    if ((debateData.rounds?.length || 0) >= numRounds && !reportFetched.value) {
+    // Trigger if: backend says complete OR we have at least 1 round (backend may run fewer rounds than numRounds)
+    const debateComplete = status?.status === 'complete' || (debateData.rounds?.length || 0) >= 1
+    if (debateComplete && !reportFetched.value) {
       try {
         await assembly.getReport(props.id)
         reportFetched.value = true
