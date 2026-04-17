@@ -396,7 +396,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { assembly } from '../api/assembly.js'
+import { assembly } from '../api/assembly_DTC_MOCK.js'
 
 const router  = useRouter()
 const loading = ref(false)
