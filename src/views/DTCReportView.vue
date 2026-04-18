@@ -306,19 +306,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
-// GODMODE: Module-level cache — survives component re-mount on navigation
-const _reportCache = new Map()  // simulation_id → report data
-const _CACHE_TTL_MS = 10 * 60 * 1000  // 10 minutes
-import { useRoute } from 'vue-router'
-import { assemblyDTC as assembly } from '../api/assembly.js'
-
-const props = defineProps({ id: String })
-const route = useRoute()
-const report = ref(null)
-
-// ── Load report ────────────────────────────────────────────────
-import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { assemblyDTC as assembly } from '../api/assembly.js'
 
@@ -328,8 +315,6 @@ const route = useRoute()
 const report  = ref(null)
 const loading = ref(false)
 const error   = ref('')
-
-// ... keep your existing computed properties here ...
 
 onMounted(async () => {
   if (!props.id) {
