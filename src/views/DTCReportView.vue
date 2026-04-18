@@ -318,33 +318,47 @@ const route = useRoute()
 const report = ref(null)
 
 // ── Load report ────────────────────────────────────────────────
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { assemblyDTC as assembly } from '../api/assembly.js'
+
+const props = defineProps({ id: String })
+const route = useRoute()
+
+const report  = ref(null)
+const loading = ref(false)
+const error   = ref('')
+
+// ... keep your existing computed properties here ...
+
 onMounted(async () => {
-  // GODMODE Fix 1: Use cached report if available (prevents flash + infinite loading)
-  const cached = _reportCache.get(props.id)
-  if (cached && (Date.now() - cached.timestamp) < _CACHE_TTL_MS) {
-    report.value = cached.data
-    loading.value = false
+  if (!props.id) {
+    error.value = 'Missing simulation ID'
     return
   }
 
+  // GODMODE Fix 1: Check cache first — instant return if already loaded
+  // (assembly.js cache handles this automatically)
+
   loading.value = true
   let attempts = 0
-  const MAX_ATTEMPTS = 30  // 30 × 2s = 60s max wait
+  const MAX_ATTEMPTS = 45  // 45 × 2s = 90s max wait
 
-  // GODMODE Fix 2: Retry loop — waits for backend 'complete' before giving up
+  // GODMODE Fix 2: Retry loop — waits for backend to finish
   while (attempts < MAX_ATTEMPTS) {
     try {
       const data = await assembly.getReport(props.id)
-      if (data && Object.keys(data).length > 0) {
+      if (data && Object.keys(data).length > 0 && !data.error) {
         report.value = data
-        _reportCache.set(props.id, { data, timestamp: Date.now() })
         loading.value = false
         return
       }
     } catch (err) {
       // 404 = not ready yet, keep polling
-      if (!err.message?.includes('404')) {
+      const msg = err.message || ''
+      if (!msg.includes('404') && !msg.includes('Report not ready')) {
         console.error('Report load error:', err)
+        error.value = 'Failed to load report. Please refresh.'
         loading.value = false
         return
       }
@@ -353,9 +367,9 @@ onMounted(async () => {
     await new Promise(r => setTimeout(r, 2000))
   }
 
-  // Max attempts reached
   loading.value = false
-  console.warn('Report fetch timed out after 60s')
+  error.value = 'Report took too long to generate. Please refresh the page.'
+  console.warn('Report fetch timed out after 90s')
 })
 
 // ── Computed from report ────────────────────────────────────────
